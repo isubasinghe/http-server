@@ -1,7 +1,14 @@
 stages:
+  - install
   - build
 
 job 1:
+  tags:
+    - isubasinghe
+    stage: install
+    script: apk install build-base
+
+job 2:
   tags:
     - isubasinghe
   stage:  build

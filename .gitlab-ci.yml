@@ -1,15 +1,10 @@
 stages:
-  - install
   - build
-
+  
 job 1:
   tags:
     - isubasinghe
-  stage:  install
-  script: apk add build-base
-
-job 2:
-  tags:
-    - isubasinghe
+  before_script:
+    - apk add build-base
   stage:  build
   script: make

@@ -5,8 +5,8 @@ stages:
 job 1:
   tags:
     - isubasinghe
-    stage: install
-    script: apk install build-base
+  stage:  install
+  script: apk install build-base
 
 job 2:
   tags:

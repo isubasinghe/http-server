@@ -2,5 +2,7 @@ stages:
   - build
 
 job 1:
+  tags:
+    - isubasinghe
   stage:  build
   script: make

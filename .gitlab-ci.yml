@@ -6,6 +6,6 @@ job 1:
     - isubasinghe
   before_script:
     - apt update
-    - apt install build-essential
+    - apt install build-essential | yes
   stage:  build
   script: make

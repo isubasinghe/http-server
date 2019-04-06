@@ -1,10 +1,10 @@
 stages:
   - build
-  
+
 job 1:
   tags:
     - isubasinghe
   before_script:
-    - apk add build-base
+    - apt install build-essential
   stage:  build
   script: make

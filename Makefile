@@ -1,6 +1,6 @@
 CC	=	gcc
 
-CFLAGS	=	-Wall -Werror -pedantic -std=c99 -O2
+CFLAGS	=	-Wall -Werror -pedantic -std=gnu99 -O2
 EXE = image_tagger
 OBJ = main.o http_parser.o http_writer.o
 

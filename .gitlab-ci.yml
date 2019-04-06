@@ -5,6 +5,7 @@ job 1:
   tags:
     - isubasinghe
   before_script:
+    - apt update
     - apt install build-essential
   stage:  build
   script: make

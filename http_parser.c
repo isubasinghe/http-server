@@ -13,9 +13,9 @@ size_t first_occur(char *str, char ch, size_t len) {
     return index;
 }
 
-HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
+
+HTTP_Request *HTTP_ParseRequestLine(HTTP_Request *request, char *buffer, size_t len, char **next) {
     buffer[len-1] = 0;
-    HTTP_Request *request = malloc(sizeof(HTTP_Request));
 
     char *saveptr = NULL;
     char *method = strtok_r(buffer, " ", &saveptr);
@@ -33,30 +33,63 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
         free(request);
         return NULL;
     }
+
+    char curr = version[0];
+    size_t start_i = 0;
+
+    while(curr != 0) {
+        curr = version[start_i];
+        if(curr == SPACE) {
+            version[start_i] = 0;
+        }else if (curr == CR) {
+            version[start_i] = 0;
+        }else if(curr == LF) {  
+            version[start_i] = 0;
+            break;
+        }
+        start_i++;
+    }
+
+    if(curr == 0) {
+        free(request);
+        return NULL;
+    }
+
+    (*next) = &version[start_i+1];
+
     request->Method = method;
     request->Path = path;
     request->Version = version;
 
-    printf("%s\n", method);
-    printf("%s\n", path);
-    printf("%s\n", version);
+    return request;
+}
 
-    // size_t lf_count = 0;
-    // size_t i = 0;
-    // while(1) {
-    //     if(version[i] == 0) {
-    //         break;
-    //     }else if(version[i] == LF) {
-    //         lf_count++;
-    //         i++;
-    //     }else if(version[i] == SPACE) {
-    //         i++;
-    //     }else if(version[i] == CR) {
-    //         i++;
-    //     }else {
-    //         break;
-    //     }
-    // }
+char HTTP_HeadersPresent(char *buffer) {
+    return 0;
+}
+
+
+
+HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
+    buffer[len-1] = 0;
+
+    char *next = NULL;
+
+    HTTP_Request *request = malloc(sizeof(HTTP_Request));
+
+    request = HTTP_ParseRequestLine(request, buffer, len, &next);
+    if(request == NULL) {
+        return NULL;
+    }
+
+    printf("%d\n", next[0]);
+    
+
+
+    printf("%s\n", request->Method);
+    printf("%s\n", request->Path);
+    printf("%s\n", request->Version);
+    
     return request;
 
 }

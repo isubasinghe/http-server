@@ -16,8 +16,8 @@ typedef struct {
 
 
 void HTTP_SetStatus(int status);
-void HTTP_SetHeader(HTTP_Response *response, char *HeaderKey, char *HeaderValue);
-void HTTP_SetCookie(HTTP_Response *response, char *CookieKey, char *CookieValue);
+void HTTP_SetHeader(HTTP_Response *response, char *headerKey, char *headerValue);
+void HTTP_SetCookie(HTTP_Response *response, char *cookieKey, char *cookieValue);
 
 char *HTTP_GetStatusPhrase(int status);
 

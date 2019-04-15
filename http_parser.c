@@ -81,15 +81,6 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
     if(request == NULL) {
         return NULL;
     }
-
-    printf("%d\n", next[0]);
-    
-
-
-    printf("%s\n", request->Method);
-    printf("%s\n", request->Path);
-    printf("%s\n", request->Version);
-    
     return request;
 
 }

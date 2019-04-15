@@ -21,11 +21,16 @@
 #include <sys/signalfd.h>
 #include <sys/sendfile.h>
 
+#include "http_router.h"
+#include "http_parser.h"
+#include "http_writer.h"
+
 
 typedef struct {
     unsigned short Port;
     char *Host;
     int ServerSock;
+    HTTP_Router *Router;
     int __sigfd;
     struct sockaddr_in __server;
     struct epoll_event __events[MAX_ACTIVE_FD];
@@ -39,7 +44,7 @@ typedef struct {
 
 HTTP_Server *HTTP_CreateServer();
 
-char HTTP_SetRouter();
+char HTTP_SetRouter(HTTP_Router *router);
 
 char HTTP_StartServer(HTTP_Server *server, char *host, unsigned short port);
 

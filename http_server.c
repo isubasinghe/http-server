@@ -100,6 +100,8 @@ static void AddEpollClient(HTTP_Server *server) {
     int sock;
     int c;
     struct sockaddr_in client;
+    memset(&client, 0, sizeof(struct sockaddr_in));
+
     sock = accept(server->ServerSock, (struct sockaddr *)&client, (socklen_t *)&c);
     if(sock < 0) {
         return;
@@ -176,6 +178,8 @@ char HTTP_StartServer(HTTP_Server *server, char *host, unsigned short port) {
             }else if(server->__events[i].data.fd == server->ServerSock) {
                 AddEpollClient(server);
             }else {
+                // For now we dont have a worker pool
+                // spawn a pthread to handle a ready client
                 __ThreadArg args;
                 args.server = server;
                 args.sock = server->__events[i].data.fd;

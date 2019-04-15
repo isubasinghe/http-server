@@ -5,9 +5,8 @@ typedef struct {
     void (*route)();
 } HTTP_Router;
 
+HTTP_Router *HTTP_CreateRouter();
 
-static void default_route() {
-    
-}
+
 
 #endif // HTTP_ROUTER_H

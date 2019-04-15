@@ -3,6 +3,7 @@
 
 #define MAX_ACTIVE_FD 500000
 #define LISTEN_BACKLOG 10
+#define READ_SIZE 2048  // 10MB is our max read size
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,13 +28,14 @@ typedef struct {
     int __sigfd;
     struct sockaddr_in __server;
     struct epoll_event __events[MAX_ACTIVE_FD];
-    int epoll_fd;
+    int __epoll_fd;
 } HTTP_Server;
 
 
 
 HTTP_Server *HTTP_CreateServer();
 
+char HTTP_SetRouter();
 
 char HTTP_StartServer(HTTP_Server *server, char *host, unsigned short port);
 

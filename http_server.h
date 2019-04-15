@@ -10,6 +10,7 @@
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
+#include <pthread.h>
 
 #include <unistd.h>
 #include <poll.h>
@@ -31,7 +32,10 @@ typedef struct {
     int __epoll_fd;
 } HTTP_Server;
 
-
+typedef struct {
+    HTTP_Server *server;
+    int sock;
+} __ThreadArg;
 
 HTTP_Server *HTTP_CreateServer();
 

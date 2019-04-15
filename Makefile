@@ -1,6 +1,6 @@
 CC	=	gcc
 
-CFLAGS	=	-Wall -Werror -pedantic -std=gnu99 -O0 -g
+CFLAGS	=	-Wall -Werror -pedantic -lpthread -std=gnu99 -O0 -g 
 EXE = image_tagger
 OBJ = main.o http_server.o http_parser.o http_writer.o
 
@@ -12,7 +12,7 @@ http_parser.o: http_parser.h
 http_writer.o: http_writer.h http_status.h
 
 $(EXE): $(OBJ)
-		$(CC) $(CFLAGS) -o $(EXE) $(OBJ)
+		$(CC) -o $(EXE) $(OBJ) $(CFLAGS)
 
 .PHONY: clean cleanly
 

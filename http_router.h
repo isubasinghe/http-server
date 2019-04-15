@@ -2,7 +2,12 @@
 #define HTTP_ROUTER_H
 
 typedef struct {
-    int cnt;
+    void (*route)();
 } HTTP_Router;
+
+
+static void default_route() {
+    
+}
 
 #endif // HTTP_ROUTER_H

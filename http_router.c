@@ -2,7 +2,7 @@
 
 static void default_route(HTTP_Request *req, HTTP_Response *res) {
     if(!strcmp(req->Path, "/")) {
-        HTTP_SendHTMLFile(res, "./index.html");
+        HTTP_SendHTMLFile(res, "./public/1_intro.html");
     }
 }
 

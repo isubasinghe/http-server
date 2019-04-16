@@ -126,6 +126,13 @@ static void ReadClient(HTTP_Server *server, int sock) {
         return;
     }
     buffer[READ_SIZE-1] = 0;
+
+    HTTP_Request *req = HTTP_ParseRequest(buffer, READ_SIZE);
+    HTTP_Response *res = HTTP_CreateResponse();
+    res->__sock = sock;
+    server->Router->route(req, res);
+    HTTP_FreeRequest(req);
+    HTTP_FreeResponse(res);
     return;
 }
 
@@ -141,6 +148,7 @@ HTTP_Server *HTTP_CreateServer() {
     if(server==NULL) {
         return NULL;
     }
+    server->Router = HTTP_CreateRouter();
     server->Host = NULL;
     server->Port = 0;
     server->ServerSock = 0;
@@ -196,6 +204,7 @@ char HTTP_StartServer(HTTP_Server *server, char *host, unsigned short port) {
 
 
 void HTTP_FreeServer(HTTP_Server *server) {
+    free(server->Router);
     free(server->Host);
     free(server);
 }

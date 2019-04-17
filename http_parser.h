@@ -10,18 +10,22 @@
 #define SPACE 32
 #define CR 13
 #define LF 10
-
+#define QUERY_INDICATOR "?"
+#define QUERY_SEP "="
+#define QUERY_AND "&"
 
 typedef struct {
     char **HeaderKeys;
     char **HeaderValues;
     size_t Num;
+    size_t Cap;
 } HTTP_Headers;
 
 typedef struct {
     char **QueryKeys;
     char **QueryValues;
     size_t Num;
+    size_t Cap;
 } HTTP_Queries;
 
 typedef struct {
@@ -29,6 +33,7 @@ typedef struct {
     char *Path;
     char *Version;
     HTTP_Headers *Headers;
+    HTTP_Queries *Queries;
     char *Body;
 } HTTP_Request;
 
@@ -37,8 +42,6 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len);
 HTTP_Request *HTTP_ParseRequestLine(HTTP_Request *request, char *buffer, size_t len, char **next);
 
 char HTTP_HeadersPresent(char *buffer);
-
-void HTTP_ParseURLQueries(HTTP_Request *request, char *path);
 
 void HTTP_FreeRequest(HTTP_Request *request);
 

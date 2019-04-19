@@ -7,34 +7,28 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include "dt_hashtable.h"
+
 #define SPACE 32
 #define CR 13
 #define LF 10
 #define QUERY_INDICATOR "?"
 #define QUERY_SEP "="
 #define QUERY_AND "&"
+#define QUERY_MAX 128
 
 typedef struct {
-    char **HeaderKeys;
-    char **HeaderValues;
     size_t Num;
     size_t Cap;
 } HTTP_Headers;
 
-typedef struct {
-    char **QueryKeys;
-    char **QueryValues;
-    size_t Num;
-    size_t Cap;
-} HTTP_Queries;
 
 typedef struct {
     char *Method;
     char *Path;
     char *Version;
-    HTTP_Headers *Headers;
-    HTTP_Queries *Queries;
     char *Body;
+    DT_HashTable *Queries;
 } HTTP_Request;
 
 HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len);

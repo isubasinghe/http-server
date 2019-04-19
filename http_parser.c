@@ -6,7 +6,7 @@ static void parseQuery(HTTP_Request *req, char *buffer) {
     if(key != NULL) {
         char *value = strtok_r(NULL, QUERY_SEP, &saveptr);
         if(value != NULL) {
-            printf("key: %s\tvalue: %s\n", key, value);
+            DT_HashTable_Put(req->Queries, key, value);
         }
     }
 }
@@ -25,8 +25,6 @@ static void parseQueries(HTTP_Request *request, char *buffer) {
                     parseQuery(request, query_start);
                 }
             }
-        }else {
-            printf("Query not found\n");
         }
     }
 }
@@ -97,7 +95,16 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
     char *next = NULL;
 
     HTTP_Request *request = malloc(sizeof(HTTP_Request));
-    
+    if(request == NULL) {
+        return NULL;
+    }
+    memset(request, 0, sizeof(HTTP_Request));
+
+    request->Queries = DT_CreateHashTable(QUERY_MAX);
+    if(request->Queries == NULL) {
+        free(request);
+        return NULL;
+    }
 
     request = HTTP_ParseRequestLine(request, buffer, len, &next);
     if(request == NULL) {
@@ -109,5 +116,6 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
 
 
 void HTTP_FreeRequest(HTTP_Request *request) {
+    DT_FreeHashTable(request->Queries);
     free(request);
 }

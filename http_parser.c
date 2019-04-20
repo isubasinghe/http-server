@@ -7,6 +7,7 @@ static void parseQuery(HTTP_Request *req, char *buffer) {
         char *value = strtok_r(NULL, QUERY_SEP, &saveptr);
         if(value != NULL) {
             DT_HashTable_Put(req->Queries, key, value);
+            req->HasQueries = 1;
         }
     }
 }
@@ -32,7 +33,6 @@ static void parseQueries(HTTP_Request *request, char *buffer) {
 
 HTTP_Request *HTTP_ParseRequestLine(HTTP_Request *request, char *buffer, size_t len, char **next) {
     buffer[len-1] = 0;
-
     char *saveptr = NULL;
     char *method = strtok_r(buffer, " ", &saveptr);
     if(method == NULL) {

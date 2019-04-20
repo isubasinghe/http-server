@@ -37,10 +37,12 @@ typedef struct {
     int __epoll_fd;
 } HTTP_Server;
 
+#ifdef WITH_THREADS
 typedef struct {
     HTTP_Server *server;
     int sock;
 } __ThreadArg;
+#endif // WITH_THREADS
 
 HTTP_Server *HTTP_CreateServer();
 

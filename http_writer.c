@@ -36,10 +36,14 @@ char *HTTP_GetStatusPhrase(int status) {
 void HTTP_SendHTMLFile(HTTP_Response *res, char *fname) {
     struct stat s;
     if(!stat(fname, &s)) {
-        dprintf(res->__sock, HTML_200_RESPONSE, s.st_size);
+        dprintf(res->__sock, HTTP_200_RESPONSE, s.st_size);
         int fd = open(fname, O_RDONLY);
         sendfile(res->__sock, fd, NULL, s.st_size);
     }
+}
+
+void HTTP_Redirect(HTTP_Response *res, char *path) {
+    dprintf(res->__sock, HTTP_301_REDIRECT, path);
 }
 
 void HTTP_EndResponse(HTTP_Response *response) {

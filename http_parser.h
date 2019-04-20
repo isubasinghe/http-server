@@ -28,6 +28,7 @@ typedef struct {
     char *Path;
     char *Version;
     char *Body;
+    char HasQueries;
     DT_HashTable *Queries;
 } HTTP_Request;
 

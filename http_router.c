@@ -1,8 +1,15 @@
 #include "http_router.h"
 
 static void default_route(HTTP_Request *req, HTTP_Response *res) {
+    printf("%s %s %d\n", req->Method, req->Path, (int)req->HasQueries);
     if(!strcmp(req->Path, "/")) {
-        HTTP_SendHTMLFile(res, "./public/1_intro.html");
+        if(!strcmp(req->Method, "POST")) {
+            HTTP_Redirect(res, "/start");
+        }else {
+            HTTP_SendHTMLFile(res, "./public/1_intro.html");
+        }
+    }else {
+        HTTP_SendHTMLFile(res, "./public/2_start.html");
     }
 }
 

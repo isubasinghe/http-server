@@ -128,6 +128,9 @@ static void ReadClient(HTTP_Server *server, int sock) {
     buffer[READ_SIZE-1] = 0;
 
     HTTP_Request *req = HTTP_ParseRequest(buffer, READ_SIZE);
+    if(req == NULL) {
+        printf("Failed to parse\n");
+    }
     HTTP_Response *res = HTTP_CreateResponse();
     res->__sock = sock;
     server->Router->route(req, res);
@@ -136,11 +139,13 @@ static void ReadClient(HTTP_Server *server, int sock) {
     return;
 }
 
+#ifdef WITH_THREADS
 static void *ReadClientThread(void *args) {
     __ThreadArg *targs = (__ThreadArg *)args;
     ReadClient(targs->server, targs->sock);
     return NULL;
 }
+#endif // WITH_THREADS
 
 HTTP_Server *HTTP_CreateServer() {
     // Allocate a new structure and zero all the data
@@ -173,7 +178,7 @@ char HTTP_StartServer(HTTP_Server *server, char *host, unsigned short port) {
     if(!SetupEpoll(server)) {
         return 0;
     }
-    pthread_t thread_id;
+    //pthread_t thread_id;
 
     char loop = 1;
     while(loop) {
@@ -186,12 +191,16 @@ char HTTP_StartServer(HTTP_Server *server, char *host, unsigned short port) {
             }else if(server->__events[i].data.fd == server->ServerSock) {
                 AddEpollClient(server);
             }else {
-                // For now we dont have a worker pool
-                // spawn a pthread to handle a ready client
+                #ifndef WITH_THREADS
+                ReadClient(server, server->__events[i].data.fd);
+                #else
+                For now we dont have a worker pool
+                spawn a pthread to handle a ready client
                 __ThreadArg args;
                 args.server = server;
                 args.sock = server->__events[i].data.fd;
                 pthread_create(&thread_id, NULL, ReadClientThread, (void *)&args);
+                #endif // WITH_THREADS
             }
         }
     } 

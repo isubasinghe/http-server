@@ -30,13 +30,14 @@ static void parseQueries(HTTP_Request *request, char *buffer) {
     }
 }
 
-
 static void parseCookie(HTTP_Request *request, char *buffer) {
     char *saveptr = NULL;
     char *cookie_key = strtok_r(buffer, "=", &saveptr);
     if(cookie_key != NULL) {
         char *cookie_value = strtok_r(NULL, "=", &saveptr);
         if(cookie_value != NULL) {
+            // printf("CookieKey: <%s>\n", cookie_key);
+            // printf("CookieValue: <%s>\n", cookie_value);
             DT_HashTable_Put(request->Cookies, cookie_key, cookie_value);
         }
     }
@@ -53,17 +54,44 @@ static void parseCookies(HTTP_Request *request, char *buffer) {
 
 static void parseHeader(HTTP_Request *request, char *buffer) {
     char *saveptr = NULL;
-    char *header_key = strtok_r(buffer, ":", &saveptr);
+    char *header_key = strtok_r(buffer, ": ", &saveptr);
     if(header_key != NULL) {
         char *header_value = strtok_r(NULL, ":", &saveptr);
         if(header_value != NULL) {
             if(!strcmp(header_key, COOKIE_STR)) {
                 parseCookies(request, header_value);
             }else {
+                // printf("HKey: <%s>\n", header_key);
+                // printf("HValue: <%s>\n", header_value);
+                if(*header_value == SPACE) {
+                    header_value++;
+                }
                 DT_HashTable_Put(request->Headers, header_key, header_value);
             }
         }
     }
+}
+
+
+static void parseFormValue(HTTP_Request *request, char *buffer) {
+    char *saveptr = NULL;
+    char *form_key = strtok_r(buffer, "=", &saveptr);
+    if(form_key) {
+        char *form_value = strtok_r(NULL, "=", &saveptr);
+        if(form_value) {
+            DT_HashTable_Put(request->FormValues, form_key, form_value);
+        }
+    }
+}
+
+static void parseFormValues(HTTP_Request *request, char *buffer) {
+    char *saveptr = NULL;
+    char *form_data = strtok_r(buffer, "&", &saveptr);
+    while( form_data != NULL ) {
+        parseFormValue(request, form_data);
+        form_data = strtok_r(NULL, "&", &saveptr);
+    }
+
 }
 
 static void terminateBody(HTTP_Request *request) {
@@ -112,6 +140,12 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
         return NULL;
     }
 
+    request->FormValues = DT_CreateHashTable(FORM_MAX);
+    if(request->FormValues == NULL) {
+        HTTP_FreeRequest(request);
+        return NULL;
+    }
+
     request->Body = EMPTY_BODY;
 
     char *saveptr = NULL;
@@ -135,6 +169,7 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
         body += 4;
         if(*body != 0) {
             request->Body = body;
+            // printf("%s\n", body);
         }
     }
     char *version = strtok_r(NULL, "\r\n", &saveptr);
@@ -150,9 +185,17 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
     while( (header = strtok_r(NULL, "\r\n", &saveptr) ) != NULL) {
         parseHeader(request, header);
     }
-
+    
     parseQueries(request, path);
     terminateBody(request);
+   
+
+    char *content_type = DT_HashTable_Gets(request->Headers, CONTENT_TYPE, NULL);
+    if(content_type) {
+        if(!strcmp(content_type, FORM_TYPE)) {
+            parseFormValues(request, body);
+        }
+    }
 
     return request;
 
@@ -168,6 +211,9 @@ void HTTP_FreeRequest(HTTP_Request *request) {
    }
    if(request->Cookies) {
        DT_FreeHashTable(request->Cookies);
+   }
+   if(request->FormValues) {
+       DT_FreeHashTable(request->FormValues);
    }
     free(request);
 }

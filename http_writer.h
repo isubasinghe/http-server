@@ -34,7 +34,7 @@
 "Content-Length: 0\r\n\r\n" \
 
 #define HTTP_301_COOKIE_REDIRECT "HTTP/1.0 301 Moved Permanently\r\n" \
-"Set Cookie: %s=%s\r\n" \
+"Set-Cookie: %s=%s\r\n" \
 "Location: %s\r\n" \
 "Connection-Type: keep-alive\r\n" \
 "Content-Length: 0\r\n\r\n"

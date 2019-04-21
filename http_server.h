@@ -46,7 +46,7 @@ typedef struct {
 
 HTTP_Server *HTTP_CreateServer();
 
-char HTTP_SetRouter(HTTP_Router *router);
+void HTTP_SetRouter(HTTP_Server *server, HTTP_Router *router);
 
 char HTTP_StartServer(HTTP_Server *server, char *host, unsigned short port);
 

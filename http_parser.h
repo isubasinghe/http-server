@@ -18,9 +18,12 @@
 #define QUERY_MAX 128
 #define HEADERS_MAX 128
 #define COOKIES_MAX 128
+#define FORM_MAX 128
 #define EMPTY_BODY ""
 #define COOKIE_STR "Cookie"
 #define CLEN_HEADER_KEY "Content-Length"
+#define CONTENT_TYPE "Content-Type"
+#define FORM_TYPE "application/x-www-form-urlencoded"
 
 
 typedef struct {
@@ -32,6 +35,7 @@ typedef struct {
     DT_HashTable *Queries;
     DT_HashTable *Headers;
     DT_HashTable *Cookies;
+    DT_HashTable *FormValues;
 } HTTP_Request;
 
 HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len);

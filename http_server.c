@@ -98,10 +98,11 @@ static char CreateServerSocket(HTTP_Server *server) {
 
 static void AddEpollClient(HTTP_Server *server) {
     int sock;
-    int c;
+    
     struct sockaddr_in client;
     memset(&client, 0, sizeof(struct sockaddr_in));
-
+    int c = sizeof(struct sockaddr_in);
+    
     sock = accept(server->ServerSock, (struct sockaddr *)&client, (socklen_t *)&c);
     if(sock < 0) {
         return;
@@ -153,6 +154,7 @@ HTTP_Server *HTTP_CreateServer() {
     if(server==NULL) {
         return NULL;
     }
+    memset(server, 0, sizeof(HTTP_Server));
     server->Router = HTTP_CreateRouter();
     server->Host = NULL;
     server->Port = 0;
@@ -161,6 +163,13 @@ HTTP_Server *HTTP_CreateServer() {
     memset(server->__events, MAX_ACTIVE_FD, sizeof(struct epoll_event));
     memset(&(server->__server), 0, sizeof(struct sockaddr_in));
     return server;
+}
+
+void HTTP_SetRouter(HTTP_Server *server, HTTP_Router *router) {
+    if(server->Router) {
+        free(server->Router);
+    }
+    server->Router = router;
 }
 
 char HTTP_StartServer(HTTP_Server *server, char *host, unsigned short port) {

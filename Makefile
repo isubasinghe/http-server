@@ -1,6 +1,6 @@
 CC	=	gcc
 
-CFLAGS	=	-Wall -Werror -pedantic -lpthread -std=gnu99 -O3 -DWITH_THREADS
+CFLAGS	=	-Wall -Werror -pedantic -lpthread -std=gnu99 -DWITH_THREADS
 EXE = image_tagger
 OBJ = main.o http_server.o http_router.o http_parser.o dt_hashtable.o http_writer.o
 

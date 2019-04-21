@@ -46,6 +46,10 @@ void HTTP_Redirect(HTTP_Response *res, char *path) {
     dprintf(res->__sock, HTTP_301_REDIRECT, path);
 }
 
+void HTTP_RedirectCookie(HTTP_Response *res, char *path, char *key, char *value) {
+    dprintf(res->__sock, HTTP_301_COOKIE_REDIRECT, key, value, path);
+}
+
 void HTTP_EndResponse(HTTP_Response *response) {
     send(response->__sock, response->Protocol, response->ProtocolLen, MSG_DONTWAIT);  
     send(response->__sock, response->StatusCode, response->CodeLen, MSG_DONTWAIT);

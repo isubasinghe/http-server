@@ -10,6 +10,7 @@ typedef struct {
 
 HTTP_Router *HTTP_CreateRouter();
 
+void HTTP_FreeRouter(HTTP_Router *router);
 
 
 #endif // HTTP_ROUTER_H

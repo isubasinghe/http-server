@@ -7,13 +7,20 @@
 #include "http_writer.h"
 #include "http_server.h"
 
+
+void route(HTTP_Request *req, HTTP_Response *res) {
+
+}
+
 int main(int argc, char *argv[]) {
 
     
 
+    
 
   
     HTTP_Server *server = HTTP_CreateServer();
+    
     if(HTTP_StartServer(server, "127.0.0.1", 8080)) {
         HTTP_FreeServer(server);
     }

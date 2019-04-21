@@ -178,7 +178,9 @@ char HTTP_StartServer(HTTP_Server *server, char *host, unsigned short port) {
     if(!SetupEpoll(server)) {
         return 0;
     }
-    //pthread_t thread_id;
+    #ifdef WITH_THREADS
+    pthread_t thread_id;
+    #endif // WITH_THREADS
 
     char loop = 1;
     while(loop) {
@@ -194,8 +196,8 @@ char HTTP_StartServer(HTTP_Server *server, char *host, unsigned short port) {
                 #ifndef WITH_THREADS
                 ReadClient(server, server->__events[i].data.fd);
                 #else
-                For now we dont have a worker pool
-                spawn a pthread to handle a ready client
+                // For now we dont have a worker pool
+                // spawn a pthread to handle a ready client
                 __ThreadArg args;
                 args.server = server;
                 args.sock = server->__events[i].data.fd;

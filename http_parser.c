@@ -31,69 +31,63 @@ static void parseQueries(HTTP_Request *request, char *buffer) {
 }
 
 
-HTTP_Request *HTTP_ParseRequestLine(HTTP_Request *request, char *buffer, size_t len, char **next) {
-    buffer[len-1] = 0;
+static void parseCookie(HTTP_Request *request, char *buffer) {
     char *saveptr = NULL;
-    char *method = strtok_r(buffer, " ", &saveptr);
-    if(method == NULL) {
-        free(request);
-        return NULL;
-    }
-    char *path = strtok_r(NULL, " ", &saveptr);
-    if(path == NULL) {
-        free(request);
-        return NULL;
-    }
-    char *version = strtok_r(NULL, " ", &saveptr);
-    if(version == NULL) {
-        free(request);
-        return NULL;
-    }
-
-    char curr = version[0];
-    size_t start_i = 0;
-
-    while(curr != 0) {
-        curr = version[start_i];
-        if(curr == SPACE) {
-            version[start_i] = 0;
-        }else if (curr == CR) {
-            version[start_i] = 0;
-        }else if(curr == LF) {  
-            version[start_i] = 0;
-            break;
+    char *cookie_key = strtok_r(buffer, "=", &saveptr);
+    if(cookie_key != NULL) {
+        char *cookie_value = strtok_r(NULL, "=", &saveptr);
+        if(cookie_value != NULL) {
+            DT_HashTable_Put(request->Cookies, cookie_key, cookie_value);
         }
-        start_i++;
     }
-
-    if(curr == 0) {
-        free(request);
-        return NULL;
-    }
-
-    (*next) = &version[start_i+1];
-
-    request->Method = method;
-    request->Path = path;
-    request->Version = version;
-
-    parseQueries(request, request->Path);
-
-
-    return request;
 }
 
-char HTTP_HeadersPresent(char *buffer) {
-    return 0;
+static void parseCookies(HTTP_Request *request, char *buffer) {
+    char *saveptr = NULL;
+    char *cookie = strtok_r(buffer, "; ", &saveptr);
+    while(cookie != NULL) {
+        parseCookie(request, cookie);
+        cookie = strtok_r(NULL, "; ", &saveptr);
+    }
 }
 
+static void parseHeader(HTTP_Request *request, char *buffer) {
+    char *saveptr = NULL;
+    char *header_key = strtok_r(buffer, ":", &saveptr);
+    if(header_key != NULL) {
+        char *header_value = strtok_r(NULL, ":", &saveptr);
+        if(header_value != NULL) {
+            if(!strcmp(header_key, COOKIE_STR)) {
+                parseCookies(request, header_value);
+            }else {
+                DT_HashTable_Put(request->Headers, header_key, header_value);
+            }
+        }
+    }
+}
+
+static void terminateBody(HTTP_Request *request) {
+    char *len_str = DT_HashTable_Gets(request->Headers, CLEN_HEADER_KEY, NULL);
+    
+    if(len_str == NULL) {
+        return;
+    }
+
+    int len = atoi(len_str);
+    size_t i = 0;
+
+    while(request->Body[i] != 0) {
+        if(i==len) {
+            request->Body[i] = 0;
+            return;
+        }
+        i++;
+    }
+}
 
 
 HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
     buffer[len-1] = 0;
-
-    char *next = NULL;
-
     HTTP_Request *request = malloc(sizeof(HTTP_Request));
     if(request == NULL) {
         return NULL;
@@ -102,20 +96,78 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
 
     request->Queries = DT_CreateHashTable(QUERY_MAX);
     if(request->Queries == NULL) {
-        free(request);
+        HTTP_FreeRequest(request);
         return NULL;
     }
 
-    request = HTTP_ParseRequestLine(request, buffer, len, &next);
-    if(request == NULL) {
+    request->Cookies = DT_CreateHashTable(COOKIES_MAX);
+    if(request->Cookies == NULL) {
+        HTTP_FreeRequest(request);
         return NULL;
     }
+
+    request->Headers = DT_CreateHashTable(HEADERS_MAX);
+    if(request->Headers == NULL) {
+        HTTP_FreeRequest(request);
+        return NULL;
+    }
+
+    request->Body = EMPTY_BODY;
+
+    char *saveptr = NULL;
+    char *method = strtok_r(buffer, " ", &saveptr);
+    if(method == NULL) {
+        HTTP_FreeRequest(request);
+        return NULL;
+    }
+
+    char *path = strtok_r(NULL, " ", &saveptr);
+    if(path == NULL) {
+        HTTP_FreeRequest(request);
+        return NULL;
+    }
+
+    char *body = strstr(saveptr, "\r\n\r\n");
+    if(body != NULL) {
+        // Null terminate the section which is end of headers
+        *(body+2) = 0;
+        *(body+3) = 0;
+        body += 4;
+        if(*body != 0) {
+            request->Body = body;
+        }
+    }
+    char *version = strtok_r(NULL, "\r\n", &saveptr);
+    if(version == NULL) {
+        HTTP_FreeRequest(request);
+        return NULL;
+    }
+    request->Method = method;
+    request->Path = path;
+    request->Version = version;
+
+    char *header = NULL;
+    while( (header = strtok_r(NULL, "\r\n", &saveptr) ) != NULL) {
+        parseHeader(request, header);
+    }
+
+    parseQueries(request, path);
+    terminateBody(request);
+
     return request;
 
 }
 
 
 void HTTP_FreeRequest(HTTP_Request *request) {
-    DT_FreeHashTable(request->Queries);
+   if(request->Queries) {
+       DT_FreeHashTable(request->Queries);
+   }
+   if(request->Headers) {
+       DT_FreeHashTable(request->Headers);
+   }
+   if(request->Cookies) {
+       DT_FreeHashTable(request->Cookies);
+   }
     free(request);
 }

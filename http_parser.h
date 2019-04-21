@@ -16,11 +16,11 @@
 #define QUERY_SEP "="
 #define QUERY_AND "&"
 #define QUERY_MAX 128
-
-typedef struct {
-    size_t Num;
-    size_t Cap;
-} HTTP_Headers;
+#define HEADERS_MAX 128
+#define COOKIES_MAX 128
+#define EMPTY_BODY ""
+#define COOKIE_STR "Cookie"
+#define CLEN_HEADER_KEY "Content-Length"
 
 
 typedef struct {
@@ -30,13 +30,11 @@ typedef struct {
     char *Body;
     char HasQueries;
     DT_HashTable *Queries;
+    DT_HashTable *Headers;
+    DT_HashTable *Cookies;
 } HTTP_Request;
 
 HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len);
-
-HTTP_Request *HTTP_ParseRequestLine(HTTP_Request *request, char *buffer, size_t len, char **next);
-
-char HTTP_HeadersPresent(char *buffer);
 
 void HTTP_FreeRequest(HTTP_Request *request);
 

@@ -1,7 +1,6 @@
 #include "http_router.h"
 
 static void default_route(HTTP_Request *req, HTTP_Response *res) {
-    printf("%s %s %d\n", req->Method, req->Path, (int)req->HasQueries);
     if(!strcmp(req->Path, "/")) {
         if(!strcmp(req->Method, "POST")) {
             HTTP_Redirect(res, "/start");

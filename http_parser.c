@@ -36,8 +36,10 @@ static void parseCookie(HTTP_Request *request, char *buffer) {
     if(cookie_key != NULL) {
         char *cookie_value = strtok_r(NULL, "=", &saveptr);
         if(cookie_value != NULL) {
+            #ifdef DEBUG
             // printf("CookieKey: <%s>\n", cookie_key);
             // printf("CookieValue: <%s>\n", cookie_value);
+            #endif
             DT_HashTable_Put(request->Cookies, cookie_key, cookie_value);
         }
     }
@@ -61,11 +63,14 @@ static void parseHeader(HTTP_Request *request, char *buffer) {
             if(!strcmp(header_key, COOKIE_STR)) {
                 parseCookies(request, header_value);
             }else {
-                // printf("HKey: <%s>\n", header_key);
-                // printf("HValue: <%s>\n", header_value);
+                
                 if(*header_value == SPACE) {
                     header_value++;
                 }
+                #ifdef DEBUG
+                // printf("HKey: <%s>\n", header_key);
+                // printf("HValue: <%s>\n", header_value);
+                #endif //DEBUG
                 DT_HashTable_Put(request->Headers, header_key, header_value);
             }
         }
@@ -117,6 +122,7 @@ static void terminateBody(HTTP_Request *request) {
 HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
     buffer[len-1] = 0;
     HTTP_Request *request = malloc(sizeof(HTTP_Request));
+    printf("%s\n", buffer);
     if(request == NULL) {
         return NULL;
     }
@@ -145,7 +151,7 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
         HTTP_FreeRequest(request);
         return NULL;
     }
-
+    
     request->Body = EMPTY_BODY;
 
     char *saveptr = NULL;
@@ -156,11 +162,15 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
     }
 
     char *path = strtok_r(NULL, " ", &saveptr);
+    
     if(path == NULL) {
         HTTP_FreeRequest(request);
         return NULL;
     }
-
+    #ifdef DEBUG
+    // printf("Path: %s\n", path);
+    #endif 
+    char set_body = 0;
     char *body = strstr(saveptr, "\r\n\r\n");
     if(body != NULL) {
         // Null terminate the section which is end of headers
@@ -168,7 +178,7 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
         *(body+3) = 0;
         body += 4;
         if(*body != 0) {
-            request->Body = body;
+            set_body = 1;
             // printf("%s\n", body);
         }
     }
@@ -177,7 +187,20 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
         HTTP_FreeRequest(request);
         return NULL;
     }
-    request->Method = method;
+    
+    if(!strcmp(method, "GET")) {
+        request->Method = HTTP_GET;
+    }else if(!strcmp(method, "POST")) {
+        request->Method = HTTP_POST;
+        if(set_body) {
+            request->Body = body;
+        }
+    }else {
+        HTTP_FreeRequest(request);
+        return NULL;
+    }
+
+    request->MethodStr = method;
     request->Path = path;
     request->Version = version;
 
@@ -196,7 +219,9 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
             parseFormValues(request, body);
         }
     }
-
+    #ifdef DEBUG
+    // printf("**********\n");
+    #endif //DEBUG
     return request;
 
 }

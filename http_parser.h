@@ -12,22 +12,38 @@
 #define SPACE 32
 #define CR 13
 #define LF 10
+
 #define QUERY_INDICATOR "?"
 #define QUERY_SEP "="
 #define QUERY_AND "&"
+
 #define QUERY_MAX 128
 #define HEADERS_MAX 128
 #define COOKIES_MAX 128
 #define FORM_MAX 128
+
 #define EMPTY_BODY ""
+
 #define COOKIE_STR "Cookie"
 #define CLEN_HEADER_KEY "Content-Length"
 #define CONTENT_TYPE "Content-Type"
 #define FORM_TYPE "application/x-www-form-urlencoded"
 
+#define HTTP_GET 1
+#define HTTP_POST 2
+#define HTTP_HEAD 3
+#define HTTP_PUT 4
+#define HTTP_DELETE 5
+#define HTTP_CONNECT 6
+#define HTTP_OPTIONS 7
+#define HTTP_TRACE 8
+#define HTTP_PATCH 9
+
+
 
 typedef struct {
-    char *Method;
+    unsigned char Method;
+    char *MethodStr;
     char *Path;
     char *Version;
     char *Body;

@@ -1,41 +1,44 @@
 #include "http_router.h"
 
 static void defaultRoute(HTTP_Request *req, HTTP_Response *res) {
+    char *user = DT_HashTable_Gets(req->Cookies, "user", NULL);
+    printf("PATH: <%s>\n", req->Path);
+    printf("METHOD: <%s>\n", req->MethodStr);
+    printf("BODY: <%s>\n", req->Body);
+
+    if(user != NULL) {
+        printf("USER: <%s>\n", user);
+    }
+
     if(!strcmp(req->Path, "/")) {
-        if(!strcmp(req->Method, "POST")) {
-            char *user = DT_HashTable_Gets(req->FormValues, "user", NULL);
-            if(user == NULL) {
-                HTTP_Redirect(res, "/");
+        if(req->Method == HTTP_GET) {
+            HTTP_SendHTMLFile(res, "./public/1_intro.html");
+        }else {
+            char *user_form = DT_HashTable_Gets(req->FormValues, "user", NULL);
+            if(user_form) {
+                printf("USER_FORM: <%s>\n", user_form);
+                HTTP_RedirectCookie(res, "/start", "user", user_form);
             }else {
-                HTTP_RedirectCookie(res, "/start", "user", user);
+                printf("ERROR USER FORM NOT PARSED\n");
             }
             
-        }else {
-            HTTP_SendHTMLFile(res, "./public/1_intro.html");
         }
-    }else {
-        if(DT_HashTable_Has(req->Cookies, "user")) {
-            if(!strcmp(req->Path, "/start")) {
-                if(!strcmp(req->Method, "GET")) {
-                    if(req->HasQueries) {
-                        HTTP_Redirect(res, "/first");
-                    }else {
-                        HTTP_SendHTMLFile(res, "./public/2_start.html");
-                    }
-                }else {
-                    HTTP_Redirect(res, "/gameover");
-                }
-            }else if(!strcmp(req->Path, "/first")) {
-                if(!strcmp(req->Method, "GET")) {
-                    HTTP_SendHTMLFile(res, "./public/4")
-                }
-            }else if(!strcmp(req->Path, "/gameover")) {
-                HTTP_SendHTMLFile(res, "./public/7_gameover.html");
+        
+    }else if(!strcmp(req->Path, "/start")) {
+        if(req->Method == HTTP_GET) {
+            if(req->HasQueries) {
+                HTTP_Redirect(res, "/firstturn");
+            }else {
+                HTTP_SendHTMLFile(res, "./public/2_start.html");
             }
-        }else {
-            HTTP_Redirect(res, "/");
         }
+    }else if(!strcmp(req->Path, "/firstturn")) {
+        HTTP_SendHTMLFile(res, "./public/3_first_turn.html");
     }
+
+    printf("**********\n");
+
+
 }
 
 

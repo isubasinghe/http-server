@@ -1,20 +1,84 @@
 <!DOCTYPE html>
 <html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <head>
 </head>
 <body>
 
-<h2>Image Tagger Game</h2>
 
-<img src="https://swift.rc.nectar.org.au/v1/AUTH_eab314456b624071ac5aecd721b977f0/comp30023-project/image-3.jpg" alt="HTML5 Icon" style="width:700px;height:400px;">
+<div id="container" style="display: flexbox; flex-direction: column; margin: auto; width: 50%; padding: 10px">
+    <h2>Image Tagger Game</h2>
 
-<form method="GET">
-    <input type="submit" class="button" name="start"  value="Start"/>
-</form>
+    <div id="user-name-container">
+    
+    </div>
+    
+    <img src="https://swift.rc.nectar.org.au/v1/AUTH_eab314456b624071ac5aecd721b977f0/comp30023-project/image-3.jpg" alt="HTML5 Icon" style="width:80%;height:80%;">
+    
+    <form method="GET">
+        <input style="
+        margin-top: 1%;
+        position: relative;
+        vertical-align: top;
+        width: 100%;
+        height: 60px;
+        padding: 0;
+        font-size: 150%;
+        color: white;
+        text-align: center;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+        background: #f1c40f;
+        border: 0;
+        border-bottom: 2px solid #e2b607;
+        cursor: pointer;
+        -webkit-box-shadow: inset 0 -2px #e2b607;
+        box-shadow: inset 0 -2px #e2b607;
+        width: 10%" type="submit" class="button" name="start"  value="Start"/>
+    </form>
+    
+    <form method="POST">
+        <input style="
+        margin-top: 1%;
+        position: relative;
+        vertical-align: top;
+        width: 100%;
+        height: 60px;
+        padding: 0;
+        font-size: 150%;
+        color: white;
+        text-align: center;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+        background: #9b59b6;
+        border: 0;
+        border-bottom: 2px solid #8d4ca7;
+        cursor: pointer;
+        -webkit-box-shadow: inset 0 -2px #8d4ca7;
+        box-shadow: inset 0 -2px #8d4ca7;
+        width: 10%" type="submit" class="button" name="quit" value="Quit"/>
+    </form>
+</div>
 
-<form method="POST">
-    <input type="submit" class="button" name="quit" value="Quit"/>
-</form>
+
+<script>
+    // Adapted from stackoverflow
+    function getCookieData( name ) {
+        var pairs = document.cookie.split("; "),
+            count = pairs.length, parts; 
+        while ( count-- ) {
+            parts = pairs[count].split("=");
+            if ( parts[0] === name )
+                return parts[1];
+        }
+        return false;
+    } 
+
+    var user = getCookieData("user");
+    if(user != false) {
+        var child = document.createElement("h3");
+        child.innerHTML = "Welcome to the main menu, " + user;
+        document.getElementById("user-name-container").appendChild(child);
+    }
+</script>
 
 </body>
 

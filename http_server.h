@@ -3,7 +3,7 @@
 
 #define MAX_ACTIVE_FD 500000
 #define LISTEN_BACKLOG 10
-#define READ_SIZE 2048  // 10MB is our max read size
+#define READ_SIZE 10240
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -42,6 +42,15 @@ void HTTP_SendHTMLFile(HTTP_Response *res, char *fname) {
     }
 }
 
+void HTTP_SendHTMLFileCookie(HTTP_Response *res, char *fname, char *key, char *value) {
+    struct stat s;
+    if(!stat(fname, &s)) {
+        dprintf(res->__sock, HTTP_200_COOKIE_RESPONSE, key, value, s.st_size);
+        int fd = open(fname, O_RDONLY);
+        sendfile(res->__sock, fd, NULL, s.st_size);
+    }
+}
+
 void HTTP_Redirect(HTTP_Response *res, char *path) {
     dprintf(res->__sock, HTTP_301_REDIRECT, path);
 }

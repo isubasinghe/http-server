@@ -119,6 +119,7 @@ static void AddEpollClient(HTTP_Server *server) {
 
 static void ReadClient(HTTP_Server *server, int sock) {
     char buffer[READ_SIZE];
+    memset(buffer, 0, READ_SIZE);
     buffer[READ_SIZE-1] = 0;
 
     if(recv(sock, buffer, READ_SIZE, 0) < 2) {

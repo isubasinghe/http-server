@@ -2,13 +2,14 @@ CC	=	gcc
 
 CFLAGS	=	-Wall -Werror -pedantic -lpthread -std=gnu99
 EXE = image_tagger
-OBJ = main.o http_server.o http_router.o http_parser.o dt_hashtable.o http_writer.o
+OBJ = main.o http_server.o http_router.o http_parser.o dt_hashtable.o http_writer.o dt_warray.o
 
 all: $(EXE)
 
 debug: CFLAGS = -Wall -Werror -pedantic -lpthread -std=gnu99 -O0 -g -DDEBUG
 
-main.o: http_parser.h
+dt_warray.o: dt_warray.h
+main.o: http_parser.h game.h dt_warray.h
 dt_hashtable.o: dt_hashtable.h
 http_server.o: http_server.h http_router.h http_parser.h http_writer.h
 http_router.o: http_router.h http_parser.h http_writer.h

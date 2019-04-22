@@ -7,8 +7,12 @@
 #include "http_writer.h"
 #include "http_server.h"
 
-#define SESSION_LEN 129 // 128 + 1
+#include "game.h"
 
+
+
+// Our Model
+static GM_GamePool *game;
 
 void generateGameSession(char *session, size_t len) {
     const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -18,56 +22,101 @@ void generateGameSession(char *session, size_t len) {
     }
 }
 
+
+// Our Controller
 void gameRouter(HTTP_Request *req, HTTP_Response *res) {
     if(req->Method == HTTP_GET) {
         if(req->HasQueries) {
             if(DT_HashTable_Has(req->Queries, "start")) {
-                // Notify game that player has quite (starting a new game means exiting old one)
-                if(DT_HashTable_Has(req->Cookies, "sessionid")) {
-
-                }
                 char session[SESSION_LEN];
                 session[SESSION_LEN-1] = 0;
                 generateGameSession(session, SESSION_LEN-1);
-                HTTP_SendHTMLFileCookie(res, "./public/3_first_turn.html", "sessionid", session);
+                if(GM_StartPlayer(game, session) == CAN_START) {
+                    HTTP_SendHTMLFileCookie(res, "./public/3_first_turn.html", "sessionid", session);
+                }else {
+                    HTTP_SendHTMLFile(res, "./public/8_server_busy.html");
+                }
+                
                 return;
             }
         }else {
             if(DT_HashTable_Has(req->Cookies, "user")) {
                 HTTP_SendHTMLFile(res, "./public/2_start.html");
             }else {
-                HTTP_SendHTMLFile(res, "./public/1_intro.html");
+                if(!strcmp(req->Path, "/keywords")) {
+
+                }else {
+                    HTTP_SendHTMLFile(res, "./public/1_intro.html");
+                }
             }
             
         }
     }else if(req->Method == HTTP_POST) {
         char *username = DT_HashTable_Gets(req->FormValues, "user", NULL);
+        char *sessionid = DT_HashTable_Gets(req->Cookies, "sessionid", NULL);
+        char *quit = DT_HashTable_Gets(req->FormValues, "quit", NULL);
+        char *guess = DT_HashTable_Gets(req->FormValues, "guess", NULL);
+
         if(username) {
             HTTP_SendHTMLFileCookie(res, "./public/2_start.html", "user", username);
             return;
         }
 
-        char *quit = DT_HashTable_Gets(req->FormValues, "quit", NULL);
+        
         if(quit) {
+            if(sessionid) {
+                GM_QuitPlayer(game, sessionid);
+            }
             HTTP_SendHTMLFile(res, "./public/7_gameover.html");
             return;
         }
 
-        char *guess = DT_HashTable_Gets(req->FormValues, "guess", NULL);
+        
         if(guess) {
-            printf("GUESSED: <%s>\n", guess);
-            HTTP_SendHTMLFile(res, "./public/4_accepted.html");
+            if(game->Ready) {
+                if(sessionid) {
+                    char *keyword = DT_HashTable_Gets(req->FormValues, "keyword", NULL);
+                    if(GM_AddKeyword(game, sessionid, keyword) == KEYWORD_ADDED) {
+                        HTTP_SendHTMLFile(res, "./public/4_accepted.html");
+                    }else if(GM_AddKeyword(game, sessionid, keyword) == KEYWORD_MATCH) {
+                        HTTP_SendHTMLFileCookie(res, "./public/6_endgame.html", "round", "1");
+                    }else {
+
+                    }
+                    
+                }else {
+                    //Should never ever get here, 
+                    // to be presented with the option to guess, this session id 
+                    // would be present because to guess the Start button was pressed
+                    // which generates a sessionid
+                    HTTP_Redirect(res, "/");
+                }
+            }else {
+                if(game->Notify) {
+                    game->Notify = NOTIFY_NONE;
+                    HTTP_SendHTMLFileCookie(res, "./public/6_endgame.html", "round", "1");
+                }else {
+                    HTTP_SendHTMLFile(res, "./public/5_discarded.html");
+                }
+            }
         }
     }
     return;
 }
 
 int main(int argc, char *argv[]) {
-
+    
+    game = GM_CreateGame();
+    if(game == NULL) {
+        printf("NO MEMORY, BYE BYE\n");
+        return 1;
+    }
+    
     HTTP_Router *router = HTTP_CreateRouter();
     router->route = gameRouter;
 
     HTTP_Server *server = HTTP_CreateServer();
+    // Sorta have MVC going here, kinda cool
     HTTP_SetRouter(server, router);
 
     if(HTTP_StartServer(server, "127.0.0.1", 8080)) {

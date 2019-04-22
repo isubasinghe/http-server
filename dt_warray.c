@@ -2,19 +2,35 @@
 
 DT_WArray *DT_CreateWArray() {
     // Create a new array structure in the heap
-    DT_WArray *DT_WArray = malloc(sizeof(DT_WArray));
+    DT_WArray *array = malloc(sizeof(DT_WArray));
+    if(array == NULL) {
+        return NULL;
+    }
+
     // Add some memory to it
-    DT_WArray->cap = INITIAL_SIZE;
-    DT_WArray->data = malloc(DT_WArray->cap * sizeof(char *));
-    DT_WArray->written = 0;
-    return DT_WArray;
+    array->cap = INITIAL_SIZE;
+    array->data = malloc(array->cap * sizeof(char *));
+    memset(array->data, 0, array->cap*sizeof(char *));
+    if(array->data == NULL) {
+        free(array);
+        return NULL;
+    }
+
+    array->written = 0;
+    return array;
 }
 
 void DT_WArray_Append(DT_WArray *w, char *s) {
     if(w->written >= w->cap) {
         // Run out of memory so realloc some more
         w->cap *= 2;
-        w->data = realloc(w->data, w->cap*sizeof(char *));
+        void *tmp = realloc(w->data, w->cap*sizeof(char *));
+        if(tmp == NULL) {
+            DT_FreeWArray(w);
+            return;
+        }
+        w->data = tmp;
+        
     }
     // Write to the next spot
     w->data[w->written] = s;

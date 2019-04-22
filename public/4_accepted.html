@@ -6,7 +6,7 @@
 
 <h2>Keyword Accepted! Keep trying more.</h2>
 
-<img src="https://swift.rc.nectar.org.au/v1/AUTH_eab314456b624071ac5aecd721b977f0/comp30023-project/image-2.jpg" alt="HTML5 Icon" style="width:700px;height:400px;">
+<img id="pic" src="" alt="HTML5 Icon" style="width:700px;height:400px;">
 
 <p>Rule: Try to guess the above image by typing a keyword which describes it:</p>
 
@@ -18,6 +18,28 @@
 <form method="POST">
     <input type="submit" class="button" name="quit" value="Quit"/>
 </form>
+
+<script>
+    var urlP1 = "https://swift.rc.nectar.org.au/v1/AUTH_eab314456b624071ac5aecd721b977f0/comp30023-project/image-";
+    var photoNum = 2;
+    var ext = ".jpg";
+    // Adapted from stackoverflow
+    function getCookieData( name ) {
+        var pairs = document.cookie.split("; "),
+            count = pairs.length, parts; 
+        while ( count-- ) {
+            parts = pairs[count].split("=");
+            if ( parts[0] === name )
+                return parts[1];
+        }
+        return false;
+    }
+    if(getCookieData('round') != false) {
+        photoNum = 1;
+    } 
+    var url = urlP1 + photoNum.toString() + ext;
+    document.getElementById("pic").src = url;
+</script>
 
 </body>
 </html>

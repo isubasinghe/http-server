@@ -21,3 +21,4 @@ void DT_WArray_Append(DT_WArray *, char *);
 
 void DT_FreeWArray(DT_WArray *);
 
+#endif

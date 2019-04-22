@@ -1,4 +1,4 @@
-#include "DT_WArray.h"
+#include "dt_warray.h"
 
 DT_WArray *DT_CreateWArray() {
     // Create a new array structure in the heap

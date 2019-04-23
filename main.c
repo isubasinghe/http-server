@@ -40,11 +40,13 @@ void gameRouter(HTTP_Request *req, HTTP_Response *res) {
                 return;
             }
         }else {
-            if(DT_HashTable_Has(req->Cookies, "user")) {
+            char path_keywords = !strcmp(req->Path, "/keywords");
+            if(DT_HashTable_Has(req->Cookies, "user") && (!path_keywords)) {
                 HTTP_SendHTMLFile(res, "./public/2_start.html");
             }else {
-                if(!strcmp(req->Path, "/keywords")) {
-
+                if(path_keywords) {
+                    char *keywords = GM_GetKeywordsJSON(game, DT_HashTable_Gets(req->Cookies, "sessionid", NULL));
+                    HTTP_SendJSON(res, keywords);
                 }else {
                     HTTP_SendHTMLFile(res, "./public/1_intro.html");
                 }
@@ -77,6 +79,9 @@ void gameRouter(HTTP_Request *req, HTTP_Response *res) {
                 if(sessionid) {
                     char *keyword = DT_HashTable_Gets(req->FormValues, "keyword", NULL);
                     if(GM_AddKeyword(game, sessionid, keyword) == KEYWORD_ADDED) {
+                        char *keywords = GM_GetKeywordsJSON(game, sessionid);
+                        printf("KEYWORDS: %s\n", keywords);
+                        free(keywords);
                         HTTP_SendHTMLFile(res, "./public/4_accepted.html");
                     }else if(GM_AddKeyword(game, sessionid, keyword) == KEYWORD_MATCH) {
                         HTTP_SendHTMLFileCookie(res, "./public/6_endgame.html", "round", "1");

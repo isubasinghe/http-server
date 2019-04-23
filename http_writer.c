@@ -51,6 +51,10 @@ void HTTP_SendHTMLFileCookie(HTTP_Response *res, char *fname, char *key, char *v
     }
 }
 
+void HTTP_SendJSON(HTTP_Response *res, char *json) {
+    dprintf(res->__sock, HTTP_200_JSON_RESPONSE, (long int)strlen(json), json);
+}
+
 void HTTP_Redirect(HTTP_Response *res, char *path) {
     dprintf(res->__sock, HTTP_301_REDIRECT, path);
 }

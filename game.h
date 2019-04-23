@@ -20,6 +20,9 @@
 #define NOTIFY_P1 1
 #define NOTIFY_P2 2
 
+#define JSON_START "{\"keywords\": ["
+#define JSON_END "]}"
+
 typedef struct {
     char SessionID[SESSION_LEN];
     char Active;
@@ -42,8 +45,51 @@ char GM_AddKeyword(GM_GamePool *pool, char *session, char *keyword);
 void GM_QuitPlayer(GM_GamePool *pool, char *session);
 void GM_FreeGame(GM_GamePool *pool);
 
-char *GM_GetKeywords(GM_GamePool *pool, char *sessionid);
+char *GM_GetKeywordsJSON(GM_GamePool *pool, char *session);
 
+char *GM_GetKeywordsJSON(GM_GamePool *pool, char *session) {
+
+    DT_WArray *array = NULL;
+    if((!strcmp(pool->Player1->SessionID, session)) && (session != NULL)) {
+        array = pool->Player1->Keywords;
+    }else if((!strcmp(pool->Player2->SessionID, session)) && (session != NULL)) {
+        array = pool->Player2->Keywords;
+    }
+
+    size_t allocate = sizeof(JSON_START) + sizeof(JSON_END);
+    if(array) {
+        for(size_t i = 0; i < array->written; i++) {
+            allocate += strlen(array->data[i]) + 4; // two for quotes, one for space and one for comma
+        }
+    }
+    
+
+    char *keywords = malloc(allocate);
+    memset(keywords, 0, allocate);
+    if(keywords == NULL) {
+        return NULL;
+    }
+
+    memcpy(keywords, JSON_START, sizeof(JSON_START));
+
+    if(array) {
+        for(size_t i=0; i < array->written-1; i++) {
+            strcat(keywords, "\"");
+            strcat(keywords, array->data[i]);
+            strcat(keywords, "\"");
+            strcat(keywords, ",");
+        }
+        if(array->written) {
+            strcat(keywords, "\"");
+            strcat(keywords, array->data[array->written-1]);
+            strcat(keywords, "\"");
+        }
+    }
+
+    strcat(keywords, JSON_END);
+
+    return keywords;
+}
 
 char GM_StartPlayer(GM_GamePool *pool, char *session) {
     char assigned = 0;

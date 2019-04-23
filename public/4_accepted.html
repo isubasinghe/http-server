@@ -6,9 +6,14 @@
 
 <h2>Keyword Accepted! Keep trying more.</h2>
 
+
+
 <img id="pic" src="" alt="HTML5 Icon" style="width:700px;height:400px;">
 
 <p>Rule: Try to guess the above image by typing a keyword which describes it:</p>
+
+<div id="input-container">
+</div>
 
 <form method="POST">
     Keyword: <input type="text" name="keyword" />
@@ -23,7 +28,8 @@
     var urlP1 = "https://swift.rc.nectar.org.au/v1/AUTH_eab314456b624071ac5aecd721b977f0/comp30023-project/image-";
     var photoNum = 2;
     var ext = ".jpg";
-    // Adapted from stackoverflow
+
+    // function  adapted from stackoverflow
     function getCookieData( name ) {
         var pairs = document.cookie.split("; "),
             count = pairs.length, parts; 
@@ -34,11 +40,28 @@
         }
         return false;
     }
+
+
     if(getCookieData('round') != false) {
         photoNum = 1;
     } 
     var url = urlP1 + photoNum.toString() + ext;
     document.getElementById("pic").src = url;
+
+    fetch("/keywords")
+    .then(data => data.json())
+    .then(json => {
+        var listRoot = document.createElement("ul");
+        json.keywords.forEach(item => {
+            let node = document.createElement("li");
+            node.innerHTML = item;
+            listRoot.appendChild(node);
+        });
+        document.getElementById("input-container").appendChild(listRoot);
+    }).catch(error => {
+        console.log("BACKEND ERROR");
+    });
+
 </script>
 
 </body>

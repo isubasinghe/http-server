@@ -20,6 +20,10 @@
 #define NOTIFY_P1 1
 #define NOTIFY_P2 2
 
+#define NOTIFY_QUIT_NONE 0
+#define NOTIFY_QUIT_P1 1
+#define NOTIFY_QUIT_P2 2
+
 #define JSON_START "{\"keywords\": ["
 #define JSON_END "]}"
 
@@ -34,6 +38,9 @@ typedef struct {
     GM_GamePlayer *Player2;
     char Ready;
     char Notify;
+    char NotifySesssionID[SESSION_LEN];
+    char NotifyQuit;
+    char NotifyQuitSessionID[SESSION_LEN];
 } GM_GamePool;
 
 void GM_FreePlayer(GM_GamePlayer *player);
@@ -98,6 +105,9 @@ char GM_StartPlayer(GM_GamePool *pool, char *session) {
             pool->Player1->Active = 1;
             memcpy(pool->Player1->SessionID, session, SESSION_LEN);
             assigned = 1;
+            if(pool->Player1->Keywords) {
+                DT_FreeWArray(pool->Player1->Keywords);
+            }
             pool->Player1->Keywords = DT_CreateWArray();
         }
     }
@@ -106,12 +116,17 @@ char GM_StartPlayer(GM_GamePool *pool, char *session) {
             pool->Player2->Active = 1;
             memcpy(pool->Player2->SessionID, session, SESSION_LEN);
             assigned = 1;
+            if(pool->Player2->Keywords) {
+                DT_FreeWArray(pool->Player2->Keywords);
+            }
             pool->Player2->Keywords = DT_CreateWArray();
         }
     }
 
     if((pool->Player1->Active) && (pool->Player2->Active)) {
         pool->Ready = 1;
+        pool->NotifyQuit = NOTIFY_QUIT_NONE;
+        pool->Notify = NOTIFY_NONE;
     }
     if(assigned) {
         return CAN_START;
@@ -121,7 +136,6 @@ char GM_StartPlayer(GM_GamePool *pool, char *session) {
 }
 
 char GM_AddKeyword(GM_GamePool *pool, char *session, char *keyword) {
-    
     if(!strcmp(pool->Player1->SessionID, session)) {
         if(!pool->Player1->Active) {
             return KEYWORD_MATCH;
@@ -133,10 +147,12 @@ char GM_AddKeyword(GM_GamePool *pool, char *session, char *keyword) {
                 pool->Player2->Active = 0;
                 pool->Ready = 0;
                 pool->Notify = NOTIFY_P2;
+                memcpy(pool->NotifySesssionID, pool->Player2->SessionID, SESSION_LEN);
                 return KEYWORD_MATCH;
             }
         }
         return KEYWORD_ADDED;
+
     }else if(!strcmp(pool->Player2->SessionID, session)) {
        if(!pool->Player2->Active) {
             return KEYWORD_MATCH;
@@ -148,6 +164,7 @@ char GM_AddKeyword(GM_GamePool *pool, char *session, char *keyword) {
                 pool->Player2->Active = 0;
                 pool->Ready = 0;
                 pool->Notify = NOTIFY_P1;
+                memcpy(pool->NotifySesssionID, pool->Player1->SessionID, SESSION_LEN);
                 return KEYWORD_MATCH;
             }
         }
@@ -162,12 +179,16 @@ void GM_QuitPlayer(GM_GamePool *pool, char *session) {
     if(!strcmp(session, pool->Player1->SessionID)) {
         pool->Player1->Active = 0;
         pool->Ready = 0;
+        pool->NotifyQuit = NOTIFY_QUIT_P2;
+        memcpy(pool->NotifyQuitSessionID, pool->Player2->SessionID, SESSION_LEN);
         return;
     }
 
     if(!strcmp(session, pool->Player2->SessionID)) {
         pool->Player2->Active = 0;
         pool->Ready = 0;
+        pool->NotifyQuit = NOTIFY_QUIT_P1;
+        memcpy(pool->NotifyQuitSessionID, pool->Player1->SessionID, SESSION_LEN);
         return;
     }
 

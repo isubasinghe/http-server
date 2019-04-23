@@ -22,7 +22,7 @@
 
 <script>
     var urlP1 = "https://swift.rc.nectar.org.au/v1/AUTH_eab314456b624071ac5aecd721b977f0/comp30023-project/image-";
-    var photoNum = 2;
+    var photoNum = 1;
     var ext = ".jpg";
     // Adapted from stackoverflow
     function getCookieData( name ) {
@@ -35,8 +35,10 @@
         }
         return false;
     }
+    // if round is 1 then move on to the photo 
+    // for the second round
     if(getCookieData('round') != false) {
-        photoNum = 1;
+        photoNum = 2;
     } 
     var url = urlP1 + photoNum.toString() + ext;
     document.getElementById("pic").src = url;

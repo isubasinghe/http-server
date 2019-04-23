@@ -4,41 +4,16 @@
 </head>
 <body>
     
-<script>
-    // function  adapted from stackoverflow
-    function getCookieData( name ) {
-        var pairs = document.cookie.split("; "),
-            count = pairs.length, parts; 
-        while ( count-- ) {
-            parts = pairs[count].split("=");
-            if ( parts[0] === name )
-                return parts[1];
-        }
-        return false;
-    }
-
-    // If on round 2 and submitting again
-    // clear the roud number cookie
-    function handleSubmit() {
-        var cookie = getCookieData("round");
-        if(cookie != false) {
-            if(cookie=="1") {
-                document.cookie = "round" + ' =;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-            }
-        }
-    }
-
-</script>
 
 <h2>Thanks for playing. The game is completed.</h2>
 
 <p>Would you like to play it again?</p>
 
-<form onsubmit="handleSubmit()" method="GET">
+<form method="GET">
     <input type="submit" class="button" name="start"  value="Start"/>
 </form>
 
-<form onsubmit="handleSubmit()" method="POST">
+<form method="POST">
     <input type="submit" class="button" name="quit" value="Quit"/>
 </form>
 

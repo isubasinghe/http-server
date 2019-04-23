@@ -80,7 +80,6 @@ void gameRouter(HTTP_Request *req, HTTP_Response *res) {
                     char *keyword = DT_HashTable_Gets(req->FormValues, "keyword", NULL);
                     if(GM_AddKeyword(game, sessionid, keyword) == KEYWORD_ADDED) {
                         char *keywords = GM_GetKeywordsJSON(game, sessionid);
-                        printf("KEYWORDS: %s\n", keywords);
                         free(keywords);
                         HTTP_SendHTMLFile(res, "./public/4_accepted.html");
                     }else if(GM_AddKeyword(game, sessionid, keyword) == KEYWORD_MATCH) {
@@ -105,18 +104,19 @@ void gameRouter(HTTP_Request *req, HTTP_Response *res) {
                 }
             }
         }
+
     }
     return;
 }
 
 int main(int argc, char *argv[]) {
-    
-    game = GM_CreateGame();
-    if(game == NULL) {
-        printf("NO MEMORY, BYE BYE\n");
+    if(argc != 3) {
+        printf("Usage: %s <server_ip> <server_port>\n", argv[0]);
         return 1;
     }
-    
+
+    game = GM_CreateGame();
+
     HTTP_Router *router = HTTP_CreateRouter();
     router->route = gameRouter;
 
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
     // Sorta have MVC going here, kinda cool
     HTTP_SetRouter(server, router);
 
-    if(HTTP_StartServer(server, "127.0.0.1", 8080)) {
+    if(HTTP_StartServer(server, argv[1], atoi(argv[2]))) {
         HTTP_FreeServer(server);
     }
     

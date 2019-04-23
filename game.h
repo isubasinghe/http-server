@@ -95,7 +95,6 @@ char GM_StartPlayer(GM_GamePool *pool, char *session) {
     char assigned = 0;
     if(!(pool->Player1->Active)) {
         if(strcmp(pool->Player2->SessionID, session) != 0) {
-            printf("ADDED PLAYER 1\n");
             pool->Player1->Active = 1;
             memcpy(pool->Player1->SessionID, session, SESSION_LEN);
             assigned = 1;
@@ -104,7 +103,6 @@ char GM_StartPlayer(GM_GamePool *pool, char *session) {
     }
     if (!(pool->Player2->Active) &&(!assigned)) {
         if(strcmp(pool->Player1->SessionID, session) != 0) {
-            printf("ADDED PLAYER 2\n");
             pool->Player2->Active = 1;
             memcpy(pool->Player2->SessionID, session, SESSION_LEN);
             assigned = 1;
@@ -113,7 +111,6 @@ char GM_StartPlayer(GM_GamePool *pool, char *session) {
     }
 
     if((pool->Player1->Active) && (pool->Player2->Active)) {
-        printf("READY TO GAME\n");
         pool->Ready = 1;
     }
     if(assigned) {
@@ -129,7 +126,6 @@ char GM_AddKeyword(GM_GamePool *pool, char *session, char *keyword) {
         if(!pool->Player1->Active) {
             return KEYWORD_MATCH;
         }
-        printf("Keyword %s added to player1\n", keyword);
         DT_WArray_Append(pool->Player1->Keywords, strdup(keyword));
         for(int i=0; i < pool->Player2->Keywords->written; i++) {
             if(!strcmp(pool->Player2->Keywords->data[i], keyword)) {
@@ -145,7 +141,6 @@ char GM_AddKeyword(GM_GamePool *pool, char *session, char *keyword) {
        if(!pool->Player2->Active) {
             return KEYWORD_MATCH;
         }
-        printf("Keyword %s added to player2\n", keyword);
         DT_WArray_Append(pool->Player2->Keywords, strdup(keyword));
         for(int i=0; i < pool->Player1->Keywords->written; i++) {
             if(!strcmp(pool->Player1->Keywords->data[i], keyword)) {
@@ -164,7 +159,6 @@ char GM_AddKeyword(GM_GamePool *pool, char *session, char *keyword) {
 }
 
 void GM_QuitPlayer(GM_GamePool *pool, char *session) {
-    printf("QUIT PLAYER\n");
     if(!strcmp(session, pool->Player1->SessionID)) {
         pool->Player1->Active = 0;
         pool->Ready = 0;

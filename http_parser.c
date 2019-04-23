@@ -36,10 +36,6 @@ static void parseCookie(HTTP_Request *request, char *buffer) {
     if(cookie_key != NULL) {
         char *cookie_value = strtok_r(NULL, "=", &saveptr);
         if(cookie_value != NULL) {
-            #ifdef DEBUG
-            // printf("CookieKey: <%s>\n", cookie_key);
-            // printf("CookieValue: <%s>\n", cookie_value);
-            #endif
             DT_HashTable_Put(request->Cookies, cookie_key, cookie_value);
         }
     }
@@ -67,10 +63,6 @@ static void parseHeader(HTTP_Request *request, char *buffer) {
                 if(*header_value == SPACE) {
                     header_value++;
                 }
-                #ifdef DEBUG
-                // printf("HKey: <%s>\n", header_key);
-                // printf("HValue: <%s>\n", header_value);
-                #endif //DEBUG
                 DT_HashTable_Put(request->Headers, header_key, header_value);
             }
         }
@@ -122,7 +114,6 @@ static void terminateBody(HTTP_Request *request) {
 HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
     buffer[len-1] = 0;
     HTTP_Request *request = malloc(sizeof(HTTP_Request));
-    printf("%s\n", buffer);
     if(request == NULL) {
         return NULL;
     }
@@ -167,9 +158,6 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
         HTTP_FreeRequest(request);
         return NULL;
     }
-    #ifdef DEBUG
-    // printf("Path: %s\n", path);
-    #endif 
     char set_body = 0;
     char *body = strstr(saveptr, "\r\n\r\n");
     if(body != NULL) {
@@ -179,7 +167,6 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
         body += 4;
         if(*body != 0) {
             set_body = 1;
-            // printf("%s\n", body);
         }
     }
     char *version = strtok_r(NULL, "\r\n", &saveptr);
@@ -219,9 +206,6 @@ HTTP_Request *HTTP_ParseRequest(char *buffer, size_t len) {
             parseFormValues(request, body);
         }
     }
-    #ifdef DEBUG
-    // printf("**********\n");
-    #endif //DEBUG
     return request;
 
 }

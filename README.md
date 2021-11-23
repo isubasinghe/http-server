@@ -3,4 +3,4 @@
 ## Neat facts
 * Epoll
 * Pure C 
-* Allocation free (Except for form values, json values where a HashMap is used for O(1) access)
+* Allocation free parsing (Except for form values, json values where a HashMap is used for O(1) access)
